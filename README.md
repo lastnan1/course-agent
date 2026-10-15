@@ -2,6 +2,15 @@
 
 基于 **AI Agent + MCP + RAG** 的全栈校园课程助手：学生通过自然语言与 Agent 对话，即可查询课表、检索个人课程资料、管理作业/成绩/学习计划；教师通过管理后台维护全部数据。前后端分离，工具层基于 MCP 协议与 Agent 解耦。
 
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Vue3](https://img.shields.io/badge/Vue%203-4FC08D?logo=vuedotjs&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?logo=langchain&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-协议-blue)
+![Docker](https://img.shields.io/badge/Docker%20Compose-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 ## 项目预览
 
 | 课程助手（SSE 流式 + 工具调用卡片 + 表格渲染） | 我的课表 |
@@ -117,6 +126,55 @@ npm run dev                          # http://localhost:5173
 ```
 
 测试账号：`student01/student01`（学生）、`admin01/admin01`（管理员）
+
+### 配置说明
+
+| 变量 | 位置 | 说明 | 示例 |
+|---|---|---|---|
+| `DEEPSEEK_API_KEY` | 根目录 `.env`（容器）/ `backend/.env`（本地） | DeepSeek API Key，聊天与卡片生成必需 | `sk-xxxx` |
+| `DATABASE_URL` | `backend/.env` | 数据库连接串（容器版由 compose 注入，无需手动配置） | `mysql+pymysql://root:密码@127.0.0.1:3306/course_agent?charset=utf8mb4` |
+| `SEMESTER_START` | 根目录 `.env` / `backend/.env` | 开学日期，Agent 据此推算当前教学周 | `2026-09-07` |
+| `JWT_SECRET` | 根目录 `.env` | JWT 签名密钥，生产环境务必更换默认值 | 随机长字符串 |
+
+## 常见问题（FAQ）
+
+<details>
+<summary><b>本地 <code>npm run dev</code> 与容器版都用 5173 端口，冲突了</b></summary>
+
+两者共用 5173：跑容器版前先停掉本地 dev server；或将 docker-compose.yml 的端口映射改为 `"5174:80"` 走 5174。
+</details>
+
+<details>
+<summary><b>国内拉取基础镜像失败 / 超时</b></summary>
+
+Docker Desktop → Settings → Docker Engine 添加镜像加速后重启 Docker：
+
+```json
+"registry-mirrors": ["https://docker.m.daocloud.io"]
+```
+</details>
+
+<details>
+<summary><b>Linux 下 <code>host.docker.internal</code> 不可用？</b></summary>
+
+docker-compose.yml 已内置 `extra_hosts: host.docker.internal:host-gateway`，Linux 无需修改即可运行。
+</details>
+
+<details>
+<summary><b>Navicat / 数据库客户端怎么查看容器版的数据？</b></summary>
+
+容器版复用本机 MySQL，直接连 `localhost:3306` 的 `course_agent` 库即可——容器后端、本地开发、Navicat 三方看到的是同一份数据。
+</details>
+
+<details>
+<summary><b>AI 没有调用工具 / 聊天接口报错？</b></summary>
+
+检查 `DEEPSEEK_API_KEY` 是否有效且有余额；确认已执行 `python -m app.seed` 建表；后端日志（`docker compose logs -f backend`）可看到工具调用与报错详情。
+</details>
+
+## License
+
+[MIT](LICENSE) © 2026 谭润江
 
 ## 技术栈
 
